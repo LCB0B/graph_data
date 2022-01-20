@@ -1,0 +1,58 @@
+
+import networkx as nx
+import numpy as np
+import pandas as pd
+import pickle
+#### FULL graph matrix
+dataset='cora'
+# gcc gml file from Kadir's files where links have been removed
+G = nx.read_gml(f"C:/Users/nnak/Downloads/networks_classification/networks_classification/{dataset}.gml")
+idex=np.asarray(nx.to_pandas_edgelist(G)).astype(np.float)
+mins=idex.min(1)
+maxs=idex.max(1)
+idex[:,0]=mins
+idex[:,1]=maxs
+mask=idex[:,0]<idex[:,1]
+idex=idex[mask]
+sparse_i=idex[:,0]
+sparse_j=idex[:,1]
+#save gcc indices
+np.savetxt('C:/Users/nnak/Finalizing_LSM/train_masks/classification/'+dataset+'/sparse_i.txt', (sparse_i), delimiter=' ')
+np.savetxt('C:/Users/nnak/Finalizing_LSM/train_masks/classification/'+dataset+'/sparse_j.txt',(sparse_j),delimiter=' ')
+
+
+
+# #### Define missing edges and missing data
+# gcc pickle files where we have the missing links and non-links
+with open("C:/Users/nnak/Downloads/cora_gcc_samples.pkl", 'rb') as f:
+    data = pickle.load(f)
+
+test_idx=np.asarray(data['testing']['edges']).astype(np.float)
+test_lab=np.asarray(data['testing']['labels'])
+
+
+mins=test_idx.min(1)
+maxs=test_idx.max(1)
+test_idx[:,0]=mins
+test_idx[:,1]=maxs
+mask=test_idx[:,0]<test_idx[:,1]
+test_idx=test_idx[mask]
+test_lab=test_lab[mask]
+
+edge_pos=test_lab==1
+no_edge_pos=test_lab==0
+
+sparse_i_rem=test_idx[:,0][edge_pos]
+sparse_j_rem=test_idx[:,1][edge_pos]
+
+
+non_sparse_i=test_idx[:,0][no_edge_pos]
+non_sparse_j=test_idx[:,1][no_edge_pos]
+    
+
+np.savetxt('C:/Users/nnak/Finalizing_LSM/train_masks/'+dataset+'/sparse_i_rem.txt', (sparse_i_rem), delimiter=' ')
+np.savetxt('C:/Users/nnak/Finalizing_LSM/train_masks/'+dataset+'/sparse_j_rem.txt',(sparse_j_rem),delimiter=' ')
+np.savetxt('C:/Users/nnak/Finalizing_LSM/train_masks/'+dataset+'/non_sparse_i.txt', (non_sparse_i), delimiter=' ')
+np.savetxt('C:/Users/nnak/Finalizing_LSM/train_masks/'+dataset+'/non_sparse_j.txt',(non_sparse_j),delimiter=' ')
+
+
